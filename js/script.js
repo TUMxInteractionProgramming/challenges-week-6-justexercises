@@ -387,3 +387,10 @@ function showMessages(currentChanel) {
         $('#messages').append(createMessageElement(value));
     });
 }
+
+// #11 Initialize app
+$(function(){
+    listChannels(compareNew);
+    loadEmojis();
+    console.log("App is initialized");
+});
