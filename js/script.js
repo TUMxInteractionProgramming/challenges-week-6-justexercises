@@ -26,8 +26,10 @@ var currentLocation = {
 /**
  * Switch channels name in the right app bar
  * @param channelObject
+ * #11 accept channelElement as second parameter, reference to channel's <li> elment
+ * @param channelElement
  */
-function switchChannel(channelObject) {
+function switchChannel(channelObject, channelElement) {
     // Log the channel switch
     console.log("Tuning in to channel", channelObject);
 
@@ -48,14 +50,21 @@ function switchChannel(channelObject) {
     $('#channel-star i').removeClass('fas far');
     $('#channel-star i').addClass(channelObject.starred ? 'fas' : 'far');
 
-
     /* highlight the selected #channel.
        This is inefficient (jQuery has to search all channel list items), but we'll change it later on */
     $('#channels li').removeClass('selected');
     $('#channels li:contains(' + channelObject.name + ')').addClass('selected');
 
+    /* #11.1 add class selected to channelElement */
+    $(channelElement).addClass(".selected");
+
     /* store selected channel in global variable */
     currentChannel = channelObject;
+
+    // Clear messages
+    $('#messages').empty();
+    // #11 show messages with showMessages() function
+    showMessages(currentChannel);
 }
 
 /* liking a channel on #click */
@@ -120,7 +129,7 @@ function Message(text) {
     this.latitude = currentLocation.latitude;
     this.longitude = currentLocation.longitude;
     // set dates
-    this.createdOn = new Date() //now
+    this.createdOn = new Date(); //now
     this.expiresOn = new Date(Date.now() + 15 * 60 * 1000); // mins * secs * msecs
     // set text
     this.text = text;
@@ -225,7 +234,12 @@ function listChannels(criterion) {
     for (i = 0; i < channels.length; i++) {
         $('#channels ul').append(createChannelElement(channels[i]));
     };
+        // TODO higlights current channel wen changing order
+    // $(currentChannel).addClass(".selected");
+    var channelElement = ".selected";
+    switchChannel(currentChannel, channelElement);
 }
+
 
 /**
  * #10 #new: This constructor function creates a new channel object.
@@ -309,7 +323,17 @@ function createChannelElement(channelObject) {
      */
 
     // create a channel
-    var channel = $('<li>').text(channelObject.name);
+    // var channelElement = channelObject.selected;
+    var channelElement = $('<li>').addClass(".selected");
+    var channel = $('<li>')
+        .text(channelObject.name)
+    // #10 attach event listener lo <li> onclick
+        .click(function(){
+            // console.log("prooobando!")
+            // $(this).switchChannel(channelObject.name, channelObject.starred)
+            switchChannel(channelObject, channelElement);
+        })
+        .addClass("clickable");
 
     // create and append channel meta
     var meta = $('<span>').addClass('channel-meta').appendTo(channel);
@@ -354,4 +378,12 @@ function abortCreationMode() {
     $('#app-bar-create').removeClass('show');
     $('#button-create').hide();
     $('#button-send').show();
+}
+
+// #11 create messages, to use in switchChannel()
+function showMessages(currentChanel) {
+    /* #11 append messages from #array with an $.each() loop */
+    $.each(currentChannel.messages, function(message, value){
+        $('#messages').append(createMessageElement(value));
+    });
 }
