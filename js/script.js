@@ -175,10 +175,11 @@ function sendMessage() {
  */
 function createMessageElement(messageObject) {
     // Calculating the expiresIn-time from the expiresOn-property
-    var expiresIn = Math.round((messageObject.expiresOn - Date.now()) / 1000 / 60);
+    var expiresIn = Math.round((messageObject.expiresOn - Date.now()) / 1000 / 60 );
 
     // Creating a message-element
-    return '<div class="message'+
+    // #11 store messageElement as object
+    var messageElement = '<div class="message'+
         //this dynamically adds #own to the #message, based on the
         //ternary operator. We need () in order not to disrupt the return.
         (messageObject.own ? ' own' : '') +
@@ -190,6 +191,7 @@ function createMessageElement(messageObject) {
         '<p>' + messageObject.text + '</p>' +
         '<button class="accent">+5 min.</button>' +
         '</div>';
+    return messageElement;
 }
 
 /* #10 Three #compare functions to #sort channels */
@@ -234,8 +236,7 @@ function listChannels(criterion) {
     for (i = 0; i < channels.length; i++) {
         $('#channels ul').append(createChannelElement(channels[i]));
     };
-        // TODO higlights current channel wen changing order
-    // $(currentChannel).addClass(".selected");
+    // #11 higlights current channel wen changing order
     var channelElement = ".selected";
     switchChannel(currentChannel, channelElement);
 }
@@ -393,4 +394,11 @@ $(function(){
     listChannels(compareNew);
     loadEmojis();
     console.log("App is initialized");
+    // #11 Interval triggers message every 10 seconds
+    setInterval(function(){
+        console.log("Updatting message elements");
+        $.each(currentChannel.messages, function(message, value){
+            $(message).find("em").text(value.expiresIn + ' min. left');
+        });
+    },10000);
 });
